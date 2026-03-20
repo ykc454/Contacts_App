@@ -1,7 +1,7 @@
 package com.example.contactapp
 
-import android.R.attr.name
 import android.R.attr.path
+import android.content.ClipData.newUri
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -10,8 +10,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,10 +42,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.NotificationCompat
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.contactapp.ui.theme.GreenYc
@@ -55,16 +51,26 @@ import com.example.contactapp.ui.theme.GreenYc
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddContactScreen(viewModel: ContactViewModel, navController: NavController) {
+fun EditContactScreen(contact: Contact,viewModel: ContactViewModel,navController: NavController){
     val context = LocalContext.current.applicationContext
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
-    var name by remember { mutableStateOf("") }
-    var phonenumber by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    val launcher =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
-            imageUri = uri
+    var imageUri by remember {
+        mutableStateOf(contact.image)
+    }
+    var name by remember {
+        mutableStateOf(contact.name)
+    }
+    var phoneNumber by remember {
+        mutableStateOf(contact.phoneNumber)
+    }
+    var email by remember {
+        mutableStateOf(contact.email)
+    }
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let{newUri ->
+            val internalPath = copyUriToInternalStorage(context,newUri,"$name.jpg")
+            internalPath?.let{path -> imageUri = path}
         }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -73,18 +79,18 @@ fun AddContactScreen(viewModel: ContactViewModel, navController: NavController) 
                     Box(modifier = Modifier
                         .fillMaxHeight()
                         .wrapContentHeight()) {
-                        Text("Add Contact", fontSize = 18.sp)
+                        Text("Edit Contact", fontSize = 18.sp)
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = {
                         Toast.makeText(
                             context,
-                            "Add Contact",
+                            "Edit Contact",
                             Toast.LENGTH_SHORT
                         ).show()
                     }) {
-                        Icon(painter = painterResource(R.drawable.add_contact_icon),contentDescription = null)
+                        Icon(painter = painterResource(R.drawable.edit_contact_icon),contentDescription = null)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -104,21 +110,19 @@ fun AddContactScreen(viewModel: ContactViewModel, navController: NavController) 
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            imageUri?. let{uri ->
-                Image(painter = rememberAsyncImagePainter(uri),
+                Image(painter = rememberAsyncImagePainter(imageUri),
                     contentDescription = null,
                     modifier = Modifier
                         .size(128.dp)
                         .clip(CircleShape),
                     contentScale = ContentScale.Crop
                 )
-            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
             Button(onClick = { launcher.launch("image/*") },
                 colors = ButtonDefaults.buttonColors(GreenYc)
-                ) {
+            ) {
                 Text(text = "Choose Image")
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -136,8 +140,8 @@ fun AddContactScreen(viewModel: ContactViewModel, navController: NavController) 
             )
 
             Spacer(modifier = Modifier.height(8.dp))
-            TextField(value = phonenumber, onValueChange = { phonenumber = it},
-                label = {Text("PhoneNumber")},
+            TextField(value = phoneNumber, onValueChange = { phoneNumber = it},
+                label = {Text("Name")},
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp)),
@@ -149,7 +153,7 @@ fun AddContactScreen(viewModel: ContactViewModel, navController: NavController) 
                 )
             )
             TextField(value = email, onValueChange = { email = it},
-                label = {Text("Email")},
+                label = {Text("Name")},
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp)),
@@ -163,35 +167,16 @@ fun AddContactScreen(viewModel: ContactViewModel, navController: NavController) 
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = {
-
-                if(imageUri == null){
-                    viewModel.addContact("whatpfp",name,phonenumber,email)
-                    navController.navigate("contactList"){
-                        popUpTo(0)
-                    }
+                val updateContact = contact.copy(image = imageUri, name = name, phoneNumber = phoneNumber)
+                viewModel.updateContact(updateContact)
+                navController.navigate("contactList"){
+                    popUpTo(0)
                 }
-                imageUri?.let{
-                    val internalPath = copyUriToInternalStorage(context, it , "$name.jpg")
-                    internalPath?.let{path->
-                        viewModel.addContact(path,name,phonenumber,email)
-                        navController.navigate("contactList"){
-                            popUpTo(0)
-                        }
-                    }
-                }
-
-
-            },
-//               enabled = imageUri != null
-                colors = ButtonDefaults.buttonColors(GreenYc)
+            }, colors = ButtonDefaults.buttonColors(GreenYc)
             ) {
                 Text("Add Contact")
             }
-            Spacer(modifier = Modifier.height(28.dp))
-            Row(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
-                Text("Note:-", modifier = Modifier.padding(10.dp), fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                Text("Fill all details and add image to enable button", color = Color.Red, modifier = Modifier.padding(10.dp))
-            }
         }
     }
+
 }

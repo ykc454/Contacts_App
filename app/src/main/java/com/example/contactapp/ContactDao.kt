@@ -21,4 +21,7 @@ interface ContactDao {
 
     @Query("SELECT * FROM contacts")
     fun getAllContacts(): Flow<List<Contact>>
+
+    @Query("SELECT * FROM contacts WHERE name LIKE :searchQuery")
+    fun searchContacts(searchQuery: String): Flow<List<Contact>>
 }

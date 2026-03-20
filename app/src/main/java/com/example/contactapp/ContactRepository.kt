@@ -1,9 +1,10 @@
 package com.example.contactapp
 
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
 
-class ContactRepository(private val contactDao: ContactDao){
+class ContactRepository @Inject constructor(private val contactDao: ContactDao){
     val allContact : Flow<List<Contact>> = contactDao.getAllContacts()
 
     suspend fun insert(contact: Contact){
@@ -16,6 +17,10 @@ class ContactRepository(private val contactDao: ContactDao){
 
     suspend fun delete(contact: Contact){
         contactDao.delete(contact)
+    }
+
+    fun searchContacts(query: String): Flow<List<Contact>>{
+        return contactDao.searchContacts("%$query%")
     }
 
 

@@ -11,31 +11,28 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.room.Room
 import com.example.contactapp.ui.theme.ContactAppTheme
+import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.io.FileOutputStream
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val database = Room.databaseBuilder(
-            applicationContext,
-            ContactDatabase::class.java,
-            "contact_database"
-        ).build()
 
-        val repository = ContactRepository(database.contactDao())
-
-        val viewModel: ContactViewModel by viewModels { ContactViewModelFactory(repository) }
         setContent {
+            val viewModel: ContactViewModel = hiltViewModel()
             val navController = rememberNavController()
             NavHost(navController, startDestination = "contactList"){
                 composable("contactList"){
@@ -43,6 +40,17 @@ class MainActivity : ComponentActivity() {
                 }
                 composable("addContact"){
                     AddContactScreen(viewModel,navController)
+                }
+                composable("contactDetail/{contactId}"){backStackEntry ->
+                    val contactId = backStackEntry.arguments?.getString("contactId")?.toInt()
+                    val contact = viewModel.allcontacts.observeAsState(initial = emptyList()).value.find{it.id == contactId}
+                    contact?.let{ContactDetailScreen(it,viewModel,navController)}
+                }
+
+                composable("editContact/{contactId}"){backStackEntry ->
+                    val contactId = backStackEntry.arguments?.getString("contactId")?.toInt()
+                    val contact = viewModel.allcontacts.observeAsState(initial = emptyList()).value.find{it.id == contactId}
+                    contact?.let{EditContactScreen(it,viewModel,navController)}
                 }
 
             }
