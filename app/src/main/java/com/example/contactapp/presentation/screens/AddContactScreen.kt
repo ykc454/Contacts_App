@@ -1,7 +1,5 @@
-package com.example.contactapp
+package com.example.contactapp.presentation.screens
 
-import android.R.attr.name
-import android.R.attr.path
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -10,7 +8,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -47,10 +44,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.NotificationCompat
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.contactapp.presentation.viewmodel.ContactViewModel
+import com.example.contactapp.R
 import com.example.contactapp.ui.theme.GreenYc
+import com.example.contactapp.utils.copyUriToInternalStorage
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -171,7 +170,7 @@ fun AddContactScreen(viewModel: ContactViewModel, navController: NavController) 
                     }
                 }
                 imageUri?.let{
-                    val internalPath = copyUriToInternalStorage(context, it , "$name.jpg")
+                    val internalPath = copyUriToInternalStorage(context, it, "$name.jpg")
                     internalPath?.let{path->
                         viewModel.addContact(path,name,phonenumber,email)
                         navController.navigate("contactList"){

@@ -1,7 +1,5 @@
-package com.example.contactapp
+package com.example.contactapp.presentation.screens
 
-import android.R.attr.path
-import android.content.ClipData.newUri
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -46,28 +44,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.contactapp.R
+import com.example.contactapp.domain.model.Contact
 import com.example.contactapp.ui.theme.GreenYc
+import com.example.contactapp.presentation.viewmodel.ContactViewModel
+import com.example.contactapp.utils.copyUriToInternalStorage
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditContactScreen(contact: Contact,viewModel: ContactViewModel,navController: NavController){
+fun EditContactScreen(contactEntity: Contact, viewModel: ContactViewModel, navController: NavController){
     val context = LocalContext.current.applicationContext
     var imageUri by remember {
-        mutableStateOf(contact.image)
+        mutableStateOf(contactEntity.image)
     }
     var name by remember {
-        mutableStateOf(contact.name)
+        mutableStateOf(contactEntity.name)
     }
     var phoneNumber by remember {
-        mutableStateOf(contact.phoneNumber)
+        mutableStateOf(contactEntity.phoneNumber)
     }
     var email by remember {
-        mutableStateOf(contact.email)
+        mutableStateOf(contactEntity.email)
     }
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let{newUri ->
-            val internalPath = copyUriToInternalStorage(context,newUri,"$name.jpg")
+            val internalPath = copyUriToInternalStorage(context, newUri, "$name.jpg")
             internalPath?.let{path -> imageUri = path}
         }
     }
@@ -167,7 +169,7 @@ fun EditContactScreen(contact: Contact,viewModel: ContactViewModel,navController
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = {
-                val updateContact = contact.copy(image = imageUri, name = name, phoneNumber = phoneNumber)
+                val updateContact = contactEntity.copy(image = imageUri, name = name, phoneNumber = phoneNumber)
                 viewModel.updateContact(updateContact)
                 navController.navigate("contactList"){
                     popUpTo(0)

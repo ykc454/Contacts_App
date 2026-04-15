@@ -1,7 +1,5 @@
-package com.example.contactapp
+package com.example.contactapp.presentation.screens
 
-import android.R.attr.top
-import android.widget.Space
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -38,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -46,11 +43,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.contactapp.presentation.viewmodel.ContactViewModel
+import com.example.contactapp.R
+import com.example.contactapp.domain.model.Contact
 import com.example.contactapp.ui.theme.GreenYc
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContactDetailScreen(contact: Contact,viewModel: ContactViewModel,navController: NavController){
+fun ContactDetailScreen(contactEntity: Contact, viewModel: ContactViewModel, navController: NavController){
     val context = LocalContext.current.applicationContext
 
     Scaffold(
@@ -83,7 +83,7 @@ fun ContactDetailScreen(contact: Contact,viewModel: ContactViewModel,navControll
             )
         },
         floatingActionButton = {
-            FloatingActionButton(containerColor = GreenYc,onClick = {navController.navigate("editContact/${contact.id}")}) {
+            FloatingActionButton(containerColor = GreenYc,onClick = {navController.navigate("editContact/${contactEntity.id}")}) {
                 Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit Contact")
             }
         }
@@ -107,8 +107,9 @@ fun ContactDetailScreen(contact: Contact,viewModel: ContactViewModel,navControll
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Image(painter = rememberAsyncImagePainter(if(contact.image == "whatpfp"){R.drawable.whatpfp}else{contact.image}),
-                        contentDescription = contact.name,
+                    Image(painter = rememberAsyncImagePainter(if(contactEntity.image == "whatpfp"){
+                        R.drawable.whatpfp}else{contactEntity.image}),
+                        contentDescription = contactEntity.name,
                         modifier = Modifier.size(128.dp)
                             .size(128.dp)
                             .clip(CircleShape),
@@ -127,7 +128,7 @@ fun ContactDetailScreen(contact: Contact,viewModel: ContactViewModel,navControll
                         ) {
                             Text("Name: ", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(contact.name, fontSize = 16.sp)
+                            Text(contactEntity.name, fontSize = 16.sp)
                         }
                     }
 
@@ -144,7 +145,7 @@ fun ContactDetailScreen(contact: Contact,viewModel: ContactViewModel,navControll
                         ) {
                             Text("PhoneNumber: ", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(contact.phoneNumber, fontSize = 16.sp)
+                            Text(contactEntity.phoneNumber, fontSize = 16.sp)
                         }
                     }
 
@@ -161,7 +162,7 @@ fun ContactDetailScreen(contact: Contact,viewModel: ContactViewModel,navControll
                         ) {
                             Text("Email: ", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(contact.email, fontSize = 16.sp)
+                            Text(contactEntity.email, fontSize = 16.sp)
                         }
                     }
                 }
@@ -169,7 +170,7 @@ fun ContactDetailScreen(contact: Contact,viewModel: ContactViewModel,navControll
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(colors = ButtonDefaults.buttonColors(GreenYc),
-                onClick = {viewModel.deleteContact(contact)
+                onClick = {viewModel.deleteContact(contactEntity)
                 navController.navigate("contactList"){
                     popUpTo(0)
 

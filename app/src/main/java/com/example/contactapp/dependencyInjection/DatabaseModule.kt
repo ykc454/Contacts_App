@@ -1,7 +1,9 @@
-package com.example.contactapp
+package com.example.contactapp.dependencyInjection
 
 import android.content.Context
 import androidx.room.Room
+import com.example.contactapp.data.local.ContactDao
+import com.example.contactapp.data.local.ContactDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
